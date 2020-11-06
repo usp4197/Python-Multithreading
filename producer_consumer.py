@@ -1,19 +1,44 @@
+from threading import Thread, Condition
 import time
-from random import randint
-import threading
+import random
 
 queue = []
+MAX_NUM = 10
+condition = Condition()
 
-def produce():
-    for i in range(0,5):
-        time.sleep(1)
-        queue.append(randint(0,9))
+class ProducerThread(Thread):
+    def run(self):
+        nums = range(5)
+        global queue
+        while True:
+            condition.acquire()
+            if len(queue) == MAX_NUM:
+                print ("Queue full, producer is waiting")
+                condition.wait()
+                print ("Space in queue, Consumer notified the producer")
+            num = random.choice(nums)
+            queue.append(num)
+            print ("Produced", num)
+            condition.notify()
+            condition.release()
+            time.sleep(random.random())
 
-def consume():
-    while True:
-        if len(queue) > 0:
-            
 
-if __name__ == "__main__":
-    p = threading.Thread(target=produce)
-    c = threading.Thread(target=consume)
+class ConsumerThread(Thread):
+    def run(self):
+        global queue
+        while True:
+            condition.acquire()
+            if not queue:
+                print ("Nothing in queue, consumer is waiting")
+                condition.wait()
+                print ("Producer added something to queue and notified the consumer")
+            num = queue.pop(0)
+            print ("Consumed", num)
+            condition.notify()
+            condition.release()
+            time.sleep(random.random())
+
+
+ProducerThread().start()
+ConsumerThread().start()
