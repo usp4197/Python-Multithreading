@@ -1,2 +1,2 @@
 # Python-Multithreading
-Learning Singleton Code Pattern and Multithreaded,multiprocessor code in Python 
+Learning Multithreaded,multiprocessor code in Python 
